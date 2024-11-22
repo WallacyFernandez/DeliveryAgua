@@ -1,33 +1,40 @@
 <?php
 
 include 'components/connect.php';
+include 'includes/auth.php';
 
 session_start();
 
 if(isset($_SESSION['user_id'])){
-   $user_id = $_SESSION['user_id'];
-}else{
-   $user_id = '';
-};
+   header('location:home.php');
+   exit();
+}
 
 if(isset($_POST['submit'])){
+    if(!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $message[] = 'Token de segurança inválido!';
+    } else {
+        $email = sanitizeInput($_POST['email']);
+        if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $message[] = 'Email inválido!';
+        } else {
+            $select_user = $conn->prepare("SELECT * FROM `users` WHERE email = ?");
+            $select_user->execute([$email]);
+            $row = $select_user->fetch(PDO::FETCH_ASSOC);
 
-   $email = $_POST['email'];
-   $email = filter_var($email, FILTER_SANITIZE_STRING);
-   $pass = sha1($_POST['pass']);
-   $pass = filter_var($pass, FILTER_SANITIZE_STRING);
-
-   $select_user = $conn->prepare("SELECT * FROM `users` WHERE email = ? AND password = ?");
-   $select_user->execute([$email, $pass]);
-   $row = $select_user->fetch(PDO::FETCH_ASSOC);
-
-   if($select_user->rowCount() > 0){
-      $_SESSION['user_id'] = $row['id'];
-      header('location:home.php');
-   }else{
-      $message[] = 'nome de usuário ou senha incorretos!';
-   }
-
+            if($select_user->rowCount() > 0){
+                if(verifyPassword($_POST['pass'], $row['password'])){
+                    loginUser($row);
+                    header('location:home.php');
+                    exit();
+                } else {
+                    $message[] = 'Senha incorreta!';
+                }
+            } else {
+                $message[] = 'Email não encontrado!';
+            }
+        }
+    }
 }
 
 ?>
@@ -55,6 +62,7 @@ if(isset($_POST['submit'])){
 
    <form action="" method="post">
       <h3>Faça Login Agora</h3>
+      <input type="hidden" name="csrf_token" value="<?= generateCSRFToken(); ?>">
       <input type="email" name="email" required placeholder="digite seu email" maxlength="50"  class="box" oninput="this.value = this.value.replace(/\s/g, '')">
       <input type="password" name="pass" required placeholder="digite sua senha" maxlength="20"  class="box" oninput="this.value = this.value.replace(/\s/g, '')">
       <input type="submit" value="entrar agora" class="btn" name="submit">

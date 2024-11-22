@@ -1,0 +1,18 @@
+2024-11-22 20:41:24 - Tentativa de login
+Email: wallacyfernandes18@gmail.com
+Hash armazenado: $argon2id$v=19$m=65536,t=4,p=3$cEpnWjNjTTlpVTcxRWhqUg$M1DDvqmtWVZQusNjRFRGvCflNqVb9ITvsh6fw5ETbh4
+Senha fornecida: wallacylendarioBR999!
+------------------------
+2024-11-22 20:41:24 - ERRO: PASSWORD_PEPPER não está definido no ambiente
+2024-11-22 20:41:44 - Tentativa de login
+Email: wallacyfernandes18@gmail.com
+Hash armazenado: $argon2id$v=19$m=65536,t=4,p=3$cEpnWjNjTTlpVTcxRWhqUg$M1DDvqmtWVZQusNjRFRGvCflNqVb9ITvsh6fw5ETbh4
+Senha fornecida: wallacylendarioBR999!
+------------------------
+2024-11-22 20:41:44 - ERRO: PASSWORD_PEPPER não está definido no ambiente
+2024-11-22 20:44:24 - Tentativa de login
+Email: wallacyfernandes18@gmail.com
+Hash armazenado: $argon2id$v=19$m=65536,t=4,p=3$cEpnWjNjTTlpVTcxRWhqUg$M1DDvqmtWVZQusNjRFRGvCflNqVb9ITvsh6fw5ETbh4
+Senha fornecida: wallacylendarioBR999!
+------------------------
+2024-11-22 20:44:24 - Verificação de senha: SUCESSO

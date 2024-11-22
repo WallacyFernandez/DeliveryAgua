@@ -1,52 +1,77 @@
 <?php
 include '../components/connect.php';
+include '../includes/auth.php';
+
 session_start();
+checkSessionTimeout(); // Função que criamos anteriormente
+
+if(!isset($_SESSION['empresa_id'])){
+   header('location:empresa_login.php');
+   exit();
+}
 
 $empresa_id = $_SESSION['empresa_id'];
 
-if(!isset($empresa_id)){
-   header('location:empresa_login.php');
-}
-
 if(isset($_POST['submit'])){
-   $name = $_POST['name'];
-   $name = filter_var($name, FILTER_SANITIZE_STRING);
-   $email = $_POST['email'];
-   $email = filter_var($email, FILTER_SANITIZE_STRING);
-   $company_name = $_POST['company_name'];
-   $company_name = filter_var($company_name, FILTER_SANITIZE_STRING);
-   $company_address = $_POST['company_address'];
-   $company_address = filter_var($company_address, FILTER_SANITIZE_STRING);
-   $company_phone = $_POST['company_phone'];
-   $company_phone = filter_var($company_phone, FILTER_SANITIZE_STRING);
+    if(!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $message[] = 'Erro de validação do token de segurança!';
+    } else {
+        $old_pass = $_POST['old_pass'];
+        $new_pass = $_POST['new_pass'];
+        $confirm_pass = $_POST['confirm_pass'];
 
-   $update_profile = $conn->prepare("UPDATE `empresas` SET name = ?, email = ?, company_name = ?, company_address = ?, company_phone = ? WHERE id = ?");
-   $update_profile->execute([$name, $email, $company_name, $company_address, $company_phone, $empresa_id]);
+        $passwordManager = new PasswordManager();
+        $passwordPolicy = new PasswordPolicy();
+        
+        try {
+            // Buscar senha atual do banco
+            $select_prev_pass = $conn->prepare("SELECT password FROM `empresas` WHERE id = ?");
+            $select_prev_pass->execute([$empresa_id]);
+            $row = $select_prev_pass->fetch(PDO::FETCH_ASSOC);
 
-   $empty_pass = 'da39a3ee5e6b4b0d3255bfef95601890afd80709';
-   $prev_pass = $_POST['prev_pass'];
-   $old_pass = sha1($_POST['old_pass']);
-   $old_pass = filter_var($old_pass, FILTER_SANITIZE_STRING);
-   $new_pass = sha1($_POST['new_pass']);
-   $new_pass = filter_var($new_pass, FILTER_SANITIZE_STRING);
-   $confirm_pass = sha1($_POST['confirm_pass']);
-   $confirm_pass = filter_var($confirm_pass, FILTER_SANITIZE_STRING);
-
-   if($old_pass == $empty_pass){
-      $message[] = 'por favor digite a senha antiga!';
-   }elseif($old_pass != $prev_pass){
-      $message[] = 'senha antiga não corresponde!';
-   }elseif($new_pass != $confirm_pass){
-      $message[] = 'senhas não correspondem!';
-   }else{
-      if($new_pass != $empty_pass){
-         $update_pass = $conn->prepare("UPDATE `empresas` SET password = ? WHERE id = ?");
-         $update_pass->execute([$confirm_pass, $empresa_id]);
-         $message[] = 'senha atualizada com sucesso!';
-      }else{
-         $message[] = 'por favor digite uma nova senha!';
-      }
-   }
+            if(empty($old_pass)){
+                $message[] = 'Por favor digite a senha antiga!';
+            } elseif(!$passwordManager->secureVerify($old_pass, $row['password'])){
+                $message[] = 'Senha antiga não corresponde!';
+                $logger->logSecurityEvent('password_change_failed', $empresa_id, 'Senha antiga incorreta');
+            } elseif($new_pass !== $confirm_pass){
+                $message[] = 'Senhas não correspondem!';
+            } else {
+                // Validar nova senha
+                $passwordErrors = $passwordPolicy->validate($new_pass);
+                if (!empty($passwordErrors)) {
+                    $message = array_merge($message ?? [], $passwordErrors);
+                } elseif (!$passwordPolicy->checkPasswordHistory($new_pass, $empresa_id, $conn)) {
+                    $message[] = 'Esta senha já foi utilizada recentemente';
+                } else {
+                    $conn->beginTransaction();
+                    
+                    // Hash da nova senha
+                    $hashed_password = $passwordManager->secureHash($new_pass);
+                    
+                    // Atualizar senha
+                    $update_pass = $conn->prepare("UPDATE `empresas` SET password = ? WHERE id = ?");
+                    $update_pass->execute([$hashed_password, $empresa_id]);
+                    
+                    // Registrar no histórico
+                    $insert_history = $conn->prepare("INSERT INTO password_history (user_id, password) VALUES (?, ?)");
+                    $insert_history->execute([$empresa_id, $hashed_password]);
+                    
+                    $conn->commit();
+                    
+                    // Regenerar sessão e registrar evento
+                    regenerateSession();
+                    $logger->logSecurityEvent('password_changed', $empresa_id, 'Senha alterada com sucesso');
+                    
+                    $message[] = 'Senha atualizada com sucesso!';
+                }
+            }
+        } catch (Exception $e) {
+            $conn->rollBack();
+            $logger->logSecurityEvent('password_change_error', $empresa_id, $e->getMessage());
+            $message[] = 'Erro ao atualizar senha. Tente novamente.';
+        }
+    }
 }
 ?>
 
