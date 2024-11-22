@@ -204,53 +204,77 @@ include 'components/wishlist_cart.php';
 <script>
 
 var swiper = new Swiper(".home-slider", {
-   loop:true,
+   loop: true,
    spaceBetween: 20,
+   speed: 2000,
+   autoplay: {
+      delay: 5000,
+      disableOnInteraction: false,
+      pauseOnMouseEnter: true,
+   },
    pagination: {
       el: ".swiper-pagination",
-      clickable:true,
-    },
+      clickable: true,
+      dynamicBullets: true,
+   },
 });
 
- var swiper = new Swiper(".category-slider", {
-   loop:true,
-   spaceBetween: 20,
+var swiper = new Swiper(".category-slider", {
+   loop: true,
+   spaceBetween: 25,
+   speed: 1000,
+   autoplay: {
+      delay: 6000,
+      disableOnInteraction: false,
+      pauseOnMouseEnter: true,
+   },
    pagination: {
       el: ".swiper-pagination",
-      clickable:true,
+      clickable: true,
+      dynamicBullets: true,
    },
    breakpoints: {
       0: {
          slidesPerView: 2,
-       },
+         grid: { rows: 1 },
+      },
       650: {
-        slidesPerView: 3,
+         slidesPerView: 3,
+         grid: { rows: 1 },
       },
       768: {
-        slidesPerView: 4,
+         slidesPerView: 4,
       },
       1024: {
-        slidesPerView: 5,
+         slidesPerView: 5,
       },
    },
 });
 
 var swiper = new Swiper(".products-slider", {
-   loop:true,
-   spaceBetween: 20,
+   loop: true,
+   spaceBetween: 25,
+   speed: 1000,
+   grabCursor: true,
+   autoplay: {
+      delay: 4500,
+      disableOnInteraction: false,
+      pauseOnMouseEnter: true,
+   },
    pagination: {
       el: ".swiper-pagination",
-      clickable:true,
+      clickable: true,
+      dynamicBullets: true,
    },
    breakpoints: {
       550: {
-        slidesPerView: 2,
+         slidesPerView: 2,
       },
       768: {
-        slidesPerView: 2,
+         slidesPerView: 2,
       },
       1024: {
-        slidesPerView: 3,
+         slidesPerView: 3,
       },
    },
 });

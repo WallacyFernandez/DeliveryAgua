@@ -2,6 +2,7 @@
 
 :root{
    --main-color:#2980b9;
+   --main-color2:#67deff;
    --orange:#f39c12;
    --red:#e74c3c;
    --black:#333;
@@ -56,7 +57,6 @@ section{
 .heading{
    font-size: 4rem;
    color:var(--black);
-   margin-bottom: 2rem;
    text-align: center;
    text-transform: uppercase;
 }
@@ -281,10 +281,11 @@ section{
 }
 
 .swiper-pagination-bullet-active{
-   background-color: var(--main-color);
+   background-color: var(--main-color2);
 }
 
 .category .slide{
+   margin-top: 2rem;
    margin-bottom: 5rem;
    box-shadow: var(--box-shadow);
    border:var(--border);
@@ -292,18 +293,11 @@ section{
    padding:2rem;
    background: var(--white);
    border-radius: .5rem;
+   transition: transform 0.3s ease;
 }
 
 .category .slide:hover{
-   background-color: var(--black);
-}
-
-.category .slide:hover img{
-   filter:invert();
-}
-
-.category .slide:hover h3{
-   color:var(--white);
+   transform: scale(1.05);
 }
 
 .category .slide img{

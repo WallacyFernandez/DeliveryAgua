@@ -51,22 +51,6 @@ if(!isset($admin_id)){
 
       <div class="box">
          <?php
-            $total_delivery = 0;
-            $select_delivery = $conn->prepare("SELECT * FROM `orders` WHERE payment_status = ?");
-            $select_delivery->execute(['Em rota de entrega']);
-            if($select_delivery->rowCount() > 0){
-               while($fetch_delivery = $select_delivery->fetch(PDO::FETCH_ASSOC)){
-                  $total_delivery += $fetch_delivery['total_price'];
-               }
-            }
-         ?>
-         <h3><span>R$</span><?= $total_delivery; ?><span>/-</span></h3>
-         <p>Em rota de entrega</p>
-         <a href="placed_orders.php?status=em_rota" class="btn">Pedidos em Rota</a>
-      </div>
-
-      <div class="box">
-         <?php
             $total_completes = 0;
             $select_completes = $conn->prepare("SELECT * FROM `orders` WHERE payment_status = ?");
             $select_completes->execute(['Concluído']);

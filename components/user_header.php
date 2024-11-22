@@ -18,7 +18,7 @@
       <a href="home.php" class="logo">Qsede<span>.Com</span></a>
 
       <nav class="navbar">
-         <a href="home.php">Início</a>
+         <a href="index.php">Início</a>
          <a href="about.php">Sobre Nós</a>
          <a href="orders.php">Pedidos</a>
          <a href="order_history.php">Histórico</a>

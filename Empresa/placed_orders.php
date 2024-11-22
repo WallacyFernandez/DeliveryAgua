@@ -14,41 +14,49 @@ $status_filter = isset($_GET['status']) ? $_GET['status'] : 'todos';
 if(isset($_POST['update_payment'])){
    $order_id = $_POST['order_id'];
    
-   // Verifica se payment_status foi enviado e não está vazio
    if(!isset($_POST['payment_status']) || $_POST['payment_status'] == ''){
       $message[] = 'Por favor, selecione um status válido';
    }else{
       $payment_status = $_POST['payment_status'];
+      $order_status = $_POST['order_status'];
       
-      // Se o status for alterado para Concluído
+      // Verifica se está tentando concluir o pagamento
       if($payment_status == 'Concluído'){
-         // Primeiro, obtém os dados do pedido
-         $get_order = $conn->prepare("SELECT * FROM `orders` WHERE id = ?");
-         $get_order->execute([$order_id]);
-         $order_data = $get_order->fetch(PDO::FETCH_ASSOC);
-         
-         // Insere no histórico
-         $insert_history = $conn->prepare("INSERT INTO `order_history` (order_id, user_id, empresa_id, name, number, email, method, address, total_products, total_price, placed_on, payment_status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
-         $insert_history->execute([
-            $order_id,
-            $order_data['user_id'],
-            $order_data['empresa_id'],
-            $order_data['name'],
-            $order_data['number'],
-            $order_data['email'],
-            $order_data['method'],
-            $order_data['address'],
-            $order_data['total_products'],
-            $order_data['total_price'],
-            $order_data['placed_on'],
-            'Concluído'
-         ]);
-      }
+         // Verifica se o pedido está entregue
+         if($order_status != 'Pedido entregue'){
+            $message[] = 'O pagamento só pode ser concluído após a entrega do pedido!';
+         }else{
+            $get_order = $conn->prepare("SELECT * FROM `orders` WHERE id = ?");
+            $get_order->execute([$order_id]);
+            $order_data = $get_order->fetch(PDO::FETCH_ASSOC);
+            
+            $insert_history = $conn->prepare("INSERT INTO `order_history` (order_id, user_id, empresa_id, name, number, email, method, address, total_products, total_price, placed_on, payment_status, order_status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            $insert_history->execute([
+               $order_id,
+               $order_data['user_id'],
+               $order_data['empresa_id'],
+               $order_data['name'],
+               $order_data['number'],
+               $order_data['email'],
+               $order_data['method'],
+               $order_data['address'],
+               $order_data['total_products'],
+               $order_data['total_price'],
+               $order_data['placed_on'],
+               'Concluído',
+               $order_status
+            ]);
 
-      // Atualiza o status do pedido
-      $update_payment = $conn->prepare("UPDATE `orders` SET payment_status = ? WHERE id = ?");
-      $update_payment->execute([$payment_status, $order_id]);
-      $message[] = 'status do pagamento atualizado!';
+            $update_payment = $conn->prepare("UPDATE `orders` SET payment_status = ?, order_status = ? WHERE id = ?");
+            $update_payment->execute([$payment_status, $order_status, $order_id]);
+            $message[] = 'status atualizado!';
+         }
+      }else{
+         // Se não estiver concluindo o pagamento, apenas atualiza normalmente
+         $update_payment = $conn->prepare("UPDATE `orders` SET payment_status = ?, order_status = ? WHERE id = ?");
+         $update_payment->execute([$payment_status, $order_status, $order_id]);
+         $message[] = 'status atualizado!';
+      }
    }
 }
 
@@ -80,8 +88,6 @@ if(isset($_GET['delete'])){
 
             if ($status_filter === 'pendente') {
                $query .= " AND payment_status = 'Pendente'";
-            } elseif ($status_filter === 'em_rota') {
-               $query .= " AND payment_status = 'Em rota de entrega'";
             } elseif ($status_filter === 'concluido') {
                $query .= " AND payment_status = 'Concluído'";
             }
@@ -100,14 +106,37 @@ if(isset($_GET['delete'])){
             <p>Total de produtos : <span><?= $fetch_orders['total_products']; ?></span></p>
             <p>Preço total : <span>R$<?= $fetch_orders['total_price']; ?></span></p>
             <p>Método de pagamento : <span><?= $fetch_orders['method']; ?></span></p>
+            <p>Status do pagamento : <span style="color:<?php 
+               if($fetch_orders['payment_status'] == 'Pendente'){ 
+                  echo '#e74c3c'; // vermelho
+               }else{ 
+                  echo '#27ae60'; // verde
+               }; 
+            ?>"><?= $fetch_orders['payment_status']; ?></span></p>
             <form action="" method="post">
                <input type="hidden" name="order_id" value="<?= $fetch_orders['id']; ?>">
                <select name="payment_status" class="select">
                   <option value="">Selecione um status</option>
                   <option value="Pendente" <?= ($fetch_orders['payment_status'] == 'Pendente') ? 'selected' : ''; ?>>Pendente</option>
-                  <option value="Em rota de entrega" <?= ($fetch_orders['payment_status'] == 'Em rota de entrega') ? 'selected' : ''; ?>>Em rota de entrega</option>
                   <option value="Concluído" <?= ($fetch_orders['payment_status'] == 'Concluído') ? 'selected' : ''; ?>>Concluído</option>
                </select>
+
+               <p style="margin-top: 1rem;">Status do pedido : <span style="color:<?php 
+                  if($fetch_orders['order_status'] == 'Preparando'){ 
+                     echo '#e67e22'; // laranja
+                  }elseif($fetch_orders['order_status'] == 'Em rota de entrega'){ 
+                     echo '#3498db'; // azul
+                  }else{ 
+                     echo '#27ae60'; // verde
+                  }; 
+               ?>"><?= $fetch_orders['order_status']; ?></span></p>
+
+               <select name="order_status" class="select">
+                  <option value="Preparando" <?= ($fetch_orders['order_status'] == 'Preparando') ? 'selected' : ''; ?>>Preparando</option>
+                  <option value="Em rota de entrega" <?= ($fetch_orders['order_status'] == 'Em rota de entrega') ? 'selected' : ''; ?>>Em rota de entrega</option>
+                  <option value="Pedido entregue" <?= ($fetch_orders['order_status'] == 'Pedido entregue') ? 'selected' : ''; ?>>Pedido entregue</option>
+               </select>
+
                <div class="flex-btn">
                   <input type="submit" value="atualizar" class="option-btn" name="update_payment">
                   <a href="placed_orders.php?delete=<?= $fetch_orders['id']; ?>" class="delete-btn" onclick="return confirm('deletar este pedido?');">deletar</a>

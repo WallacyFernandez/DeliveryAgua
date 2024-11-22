@@ -63,14 +63,14 @@ if(isset($_POST['order'])){
       $empresa_data = $cart_items->fetch(PDO::FETCH_ASSOC);
       $empresa_id = $empresa_data['empresa_id'];
 
-      $insert_order = $conn->prepare("INSERT INTO `orders`(user_id, empresa_id, name, number, email, method, address, total_products, total_price, placed_on, payment_status) VALUES(?,?,?,?,?,?,?,?,?,?,?)");
-      $insert_order->execute([$user_id, $empresa_id, $name, $number, $email, $method, $address, $total_products, $total_price, $placed_on, 'Pendente']);
+      $insert_order = $conn->prepare("INSERT INTO `orders`(user_id, empresa_id, name, number, email, method, address, total_products, total_price, placed_on, payment_status, order_status) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)");
+      $insert_order->execute([$user_id, $empresa_id, $name, $number, $email, $method, $address, $total_products, $total_price, $placed_on, 'Pendente', 'Preparando']);
 
       $delete_cart = $conn->prepare("DELETE FROM `cart` WHERE user_id = ?");
       $delete_cart->execute([$user_id]);
 
       $message[] = 'pedido feito com sucesso!';
-      header('location:home.php');
+      header('location:index.php');
       exit();
    }else{
       $message[] = 'seu carrinho está vazio';

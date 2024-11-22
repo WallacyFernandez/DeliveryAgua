@@ -48,6 +48,15 @@ if(isset($_SESSION['user_id'])){
       <p>Seus pedidos : <span><?= $fetch_history['total_products']; ?></span></p>
       <p>Preço total : <span>R$<?= $fetch_history['total_price']; ?>/-</span></p>
       <p>Status do pagamento : <span style="color:#27ae60;">Concluído</span></p>
+      <p>Status do pedido : <span style="color:<?php 
+         if($fetch_history['order_status'] == 'Preparando'){ 
+            echo '#e67e22'; // laranja
+         }elseif($fetch_history['order_status'] == 'Em rota de entrega'){ 
+            echo '#3498db'; // azul
+         }else{ 
+            echo '#27ae60'; // verde
+         }; 
+      ?>"><?= $fetch_history['order_status']; ?></span></p>
    </div>
    <?php
          }

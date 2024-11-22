@@ -62,6 +62,15 @@ if(isset($_SESSION['user_id'])){
               echo '#f39c12'; // laranja
           }; 
       ?>"><?= $fetch_orders['payment_status']; ?></span> </p>
+      <p>Status do pedido : <span style="color:<?php 
+         if($fetch_orders['order_status'] == 'Preparando'){ 
+            echo '#e67e22'; // laranja
+         }elseif($fetch_orders['order_status'] == 'Em rota de entrega'){ 
+            echo '#3498db'; // azul
+         }else{ 
+            echo '#27ae60'; // verde
+         }; 
+      ?>"><?= $fetch_orders['order_status']; ?></span></p>
    </div>
    <?php
       }
