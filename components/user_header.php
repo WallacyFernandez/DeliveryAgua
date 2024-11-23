@@ -10,6 +10,7 @@
       }
    }
 ?>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
 
 <header class="header">
 
@@ -28,13 +29,18 @@
 
       <div class="icons">
          <?php
-            $count_wishlist_items = $conn->prepare("SELECT * FROM `wishlist` WHERE user_id = ?");
-            $count_wishlist_items->execute([$user_id]);
-            $total_wishlist_counts = $count_wishlist_items->rowCount();
+            if(isset($user_id) && $user_id != ''){
+               $count_wishlist_items = $conn->prepare("SELECT * FROM `wishlist` WHERE user_id = ?");
+               $count_wishlist_items->execute([$user_id]);
+               $total_wishlist_counts = $count_wishlist_items->rowCount();
 
-            $count_cart_items = $conn->prepare("SELECT * FROM `cart` WHERE user_id = ?");
-            $count_cart_items->execute([$user_id]);
-            $total_cart_counts = $count_cart_items->rowCount();
+               $count_cart_items = $conn->prepare("SELECT * FROM `cart` WHERE user_id = ?");
+               $count_cart_items->execute([$user_id]);
+               $total_cart_counts = $count_cart_items->rowCount();
+            }else{
+               $total_wishlist_counts = 0;
+               $total_cart_counts = 0;
+            }
          ?>
          <div id="menu-btn" class="fas fa-bars"></div>
          <a href="search_page.php"><i class="fas fa-search"></i>Buscar</a>

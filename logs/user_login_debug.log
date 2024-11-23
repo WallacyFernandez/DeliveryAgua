@@ -1,0 +1,14 @@
+2024-11-23 05:04:07 - Tentativa de login
+Email: wallacyfernandes5@gmail.com
+------------------------
+2024-11-23 05:04:08 - Dados de verificação
+Hash armazenado: $argon2id$v=19$m=65536,t=4,p=3$ajJvbllMUy5EN0loL0RSWQ$5J8BcHEoCz+XxykqISmuKNiWrGrTruL9F8pBbZVCluw
+------------------------
+2024-11-23 05:04:08 - ERRO: PASSWORD_PEPPER não está definido no ambiente
+2024-11-23 05:07:21 - Tentativa de login
+Email: wallacyfernandes5@gmail.com
+------------------------
+2024-11-23 05:07:21 - Dados de verificação
+Hash armazenado: $argon2id$v=19$m=65536,t=4,p=3$ajJvbllMUy5EN0loL0RSWQ$5J8BcHEoCz+XxykqISmuKNiWrGrTruL9F8pBbZVCluw
+------------------------
+2024-11-23 05:07:22 - Verificação de senha: SUCESSO

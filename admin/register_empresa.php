@@ -74,8 +74,8 @@ if(isset($_POST['submit'])){
                         
                         $empresa_id = $conn->lastInsertId();
                         
-                        // Registrar senha no histórico
-                        $insert_history = $conn->prepare("INSERT INTO password_history (user_id, password) VALUES (?, ?)");
+                        // Registrar senha no histórico - VERSÃO CORRIGIDA
+                        $insert_history = $conn->prepare("INSERT INTO password_history (user_id, empresa_id, password, user_type) VALUES (NULL, ?, ?, 'empresa')");
                         $insert_history->execute([$empresa_id, $hashed_password]);
                         
                         $conn->commit();
